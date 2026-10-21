@@ -1,138 +1,408 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitLog</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitLog</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #f5f5f7;
-      color: #1d1d1f;
-    }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+               "Segoe UI", sans-serif;
+  background: #f5f5f7;
+  color: #1d1d1f;
+}
 
-    .app {
-      max-width: 480px;
-      margin: 0 auto;
-      min-height: 100vh;
-      padding: 40px 20px;
-    }
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
 
-    .logo {
-      font-size: 38px;
-      font-weight: 700;
-      letter-spacing: -1.5px;
-      margin-bottom: 8px;
-    }
+.logo {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+}
 
-    .subtitle {
-      color: #6e6e73;
-      font-size: 16px;
-      margin-bottom: 48px;
-    }
+.subtitle {
+  color: #6e6e73;
+  font-size: 16px;
+  margin-top: 8px;
+  margin-bottom: 48px;
+}
 
-    h2 {
-      font-size: 26px;
-      margin: 0 0 8px;
-      letter-spacing: -0.5px;
-    }
+h2 {
+  font-size: 26px;
+  line-height: 1.15;
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
 
-    .description {
-      color: #6e6e73;
-      margin-bottom: 28px;
-    }
+.description {
+  color: #6e6e73;
+  margin-bottom: 28px;
+}
 
-    .person {
-      width: 100%;
-      border: 0;
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 3px 18px rgba(0,0,0,0.05);
-      transition: transform .15s ease;
-    }
+/* KARTY */
 
-    .person:active {
-      transform: scale(.98);
-    }
+.card {
+  width: 100%;
+  border: 0;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
 
-    .avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: #f0f0f2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-    }
+  display: flex;
+  align-items: center;
+  gap: 16px;
 
-    .arrow {
-      margin-left: auto;
-      color: #86868b;
-      font-size: 24px;
-    }
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1d1d1f;
 
-    #selected {
-      margin-top: 36px;
-      padding: 18px;
-      background: #e8f0ff;
-      color: #0066cc;
-      border-radius: 16px;
-      display: none;
-      font-weight: 600;
-    }
-  </style>
+  cursor: pointer;
+  text-align: left;
+
+  box-shadow: 0 3px 18px rgba(0,0,0,0.05);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 5px 22px rgba(0,0,0,0.08);
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+/* AVATAR */
+
+.avatar {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  background: #f0f0f2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* IKONY KATEGORII */
+
+.icon {
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+
+  border-radius: 15px;
+  background: #f0f0f2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #1d1d1f;
+}
+
+.icon svg {
+  width: 25px;
+  height: 25px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.arrow {
+  margin-left: auto;
+  color: #86868b;
+  font-size: 26px;
+  font-weight: 400;
+}
+
+/* NAWIGACJA */
+
+.back {
+  border: 0;
+  background: none;
+  color: #0071e3;
+
+  font-family: inherit;
+  font-size: 16px;
+
+  padding: 0;
+  margin-bottom: 32px;
+
+  cursor: pointer;
+}
+
+.user {
+  color: #0071e3;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* EKRANY */
+
+.screen {
+  display: none;
+}
+
+.screen.active {
+  display: block;
+}
+
+</style>
 </head>
 
 <body>
 
-  <main class="app">
+<main class="app">
 
-    <div class="logo">FitLog</div>
-    <div class="subtitle">Trening. Progres. Historia.</div>
+<!-- ============================= -->
+<!-- WYBÓR OSOBY -->
+<!-- ============================= -->
 
-    <h2>Kto dziś trenuje?</h2>
-    <div class="description">
-      Wybierz osobę, aby rozpocząć trening.
+<section id="personScreen" class="screen active">
+
+  <div class="logo">FitLog</div>
+  <div class="subtitle">Trening. Progres. Historia.</div>
+
+  <h2>Kto dziś trenuje?</h2>
+
+  <div class="description">
+    Wybierz osobę, aby rozpocząć trening.
+  </div>
+
+  <button class="card" onclick="selectPerson('Adam')">
+
+    <div class="avatar">A</div>
+
+    <span>Adam</span>
+
+    <div class="arrow">›</div>
+
+  </button>
+
+
+  <button class="card" onclick="selectPerson('Szymon')">
+
+    <div class="avatar">S</div>
+
+    <span>Szymon</span>
+
+    <div class="arrow">›</div>
+
+  </button>
+
+</section>
+
+
+<!-- ============================= -->
+<!-- WYBÓR KATEGORII -->
+<!-- ============================= -->
+
+<section id="categoryScreen" class="screen">
+
+  <button class="back" onclick="goBack()">
+    ‹ Zmień osobę
+  </button>
+
+  <div class="user" id="activeUser"></div>
+
+  <h2>Wybierz kategorię</h2>
+
+  <div class="description">
+    Co dziś ćwiczymy?
+  </div>
+
+
+  <!-- ŁAWKA -->
+
+  <button class="card" onclick="selectCategory('Ławka')">
+
+    <div class="icon">
+
+      <svg viewBox="0 0 24 24">
+
+        <path d="M4 18h16"/>
+        <path d="M6 18v-5"/>
+        <path d="M18 18v-5"/>
+        <path d="M7 13h10"/>
+        <path d="M3 9h18"/>
+        <path d="M5 7v4"/>
+        <path d="M19 7v4"/>
+
+      </svg>
+
     </div>
 
-    <button class="person" onclick="selectPerson('Adam')">
-      <div class="avatar">A</div>
-      Adam
-      <div class="arrow">›</div>
-    </button>
+    <span>Ławka</span>
 
-    <button class="person" onclick="selectPerson('Szymon')">
-      <div class="avatar">S</div>
-      Szymon
-      <div class="arrow">›</div>
-    </button>
+    <div class="arrow">›</div>
 
-    <div id="selected"></div>
+  </button>
 
-  </main>
 
-  <script>
-    function selectPerson(name) {
-      const box = document.getElementById('selected');
-      box.style.display = 'block';
-      box.textContent = 'Wybrano: ' + name;
-    }
-  </script>
+  <!-- LINKI -->
+
+  <button class="card" onclick="selectCategory('Linki')">
+
+    <div class="icon">
+
+      <svg viewBox="0 0 24 24">
+
+        <circle cx="5" cy="6" r="2"/>
+        <circle cx="19" cy="6" r="2"/>
+
+        <path d="M5 8v5"/>
+        <path d="M19 8v5"/>
+
+        <path d="M5 13l5 5"/>
+        <path d="M19 13l-5 5"/>
+
+        <circle cx="12" cy="18" r="2"/>
+
+      </svg>
+
+    </div>
+
+    <span>Linki</span>
+
+    <div class="arrow">›</div>
+
+  </button>
+
+
+  <!-- MASZYNY -->
+
+  <button class="card" onclick="selectCategory('Maszyny')">
+
+    <div class="icon">
+
+      <svg viewBox="0 0 24 24">
+
+        <circle cx="12" cy="12" r="3"/>
+
+        <path d="M12 2v3"/>
+        <path d="M12 19v3"/>
+
+        <path d="M2 12h3"/>
+        <path d="M19 12h3"/>
+
+        <path d="M5 5l2 2"/>
+        <path d="M17 17l2 2"/>
+
+        <path d="M19 5l-2 2"/>
+        <path d="M7 17l-2 2"/>
+
+      </svg>
+
+    </div>
+
+    <span>Maszyny</span>
+
+    <div class="arrow">›</div>
+
+  </button>
+
+
+  <!-- INNE -->
+
+  <button class="card" onclick="selectCategory('Inne')">
+
+    <div class="icon">
+
+      <svg viewBox="0 0 24 24">
+
+        <path d="M12 5v14"/>
+        <path d="M5 12h14"/>
+
+      </svg>
+
+    </div>
+
+    <span>Inne</span>
+
+    <div class="arrow">›</div>
+
+  </button>
+
+</section>
+
+</main>
+
+
+<script>
+
+let currentUser = null;
+
+
+/* WYBÓR OSOBY */
+
+function selectPerson(name) {
+
+  currentUser = name;
+
+  document
+    .getElementById("personScreen")
+    .classList.remove("active");
+
+  document
+    .getElementById("categoryScreen")
+    .classList.add("active");
+
+  document
+    .getElementById("activeUser")
+    .textContent = name + " · Dzisiejszy trening";
+
+}
+
+
+/* POWRÓT */
+
+function goBack() {
+
+  document
+    .getElementById("categoryScreen")
+    .classList.remove("active");
+
+  document
+    .getElementById("personScreen")
+    .classList.add("active");
+
+}
+
+
+/* WYBÓR KATEGORII */
+
+function selectCategory(category) {
+
+  alert("Wybrano kategorię: " + category);
+
+}
+
+</script>
 
 </body>
 </html>
