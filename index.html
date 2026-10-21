@@ -1,408 +1,970 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FitLog</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitLog</title>
 
-<style>
-* {
-  box-sizing: border-box;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-               "Segoe UI", sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
-}
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                   "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+    }
 
-.app {
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 40px 20px;
-}
+    button,
+    input,
+    select {
+      font: inherit;
+    }
 
-.logo {
-  font-size: 38px;
-  font-weight: 700;
-  letter-spacing: -1.5px;
-}
+    .app {
+      max-width: 480px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
 
-.subtitle {
-  color: #6e6e73;
-  font-size: 16px;
-  margin-top: 8px;
-  margin-bottom: 48px;
-}
+    .logo {
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+    }
 
-h2 {
-  font-size: 26px;
-  line-height: 1.15;
-  margin: 0 0 8px;
-  letter-spacing: -0.5px;
-}
+    .subtitle {
+      margin: 8px 0 48px;
+      color: #6e6e73;
+      font-size: 16px;
+    }
 
-.description {
-  color: #6e6e73;
-  margin-bottom: 28px;
-}
+    h2 {
+      margin: 0 0 8px;
+      font-size: 26px;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+    }
 
-/* KARTY */
+    .description {
+      margin-bottom: 28px;
+      color: #6e6e73;
+      line-height: 1.45;
+    }
 
-.card {
-  width: 100%;
-  border: 0;
-  background: #ffffff;
-  border-radius: 20px;
-  padding: 18px 20px;
-  margin-bottom: 14px;
+    .screen {
+      display: none;
+    }
 
-  display: flex;
-  align-items: center;
-  gap: 16px;
+    .screen.active {
+      display: block;
+    }
 
-  font-family: inherit;
-  font-size: 18px;
-  font-weight: 600;
-  color: #1d1d1f;
+    .card {
+      width: 100%;
+      min-height: 86px;
+      margin-bottom: 14px;
+      padding: 16px 18px;
 
-  cursor: pointer;
-  text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 15px;
 
-  box-shadow: 0 3px 18px rgba(0,0,0,0.05);
+      border: 0;
+      border-radius: 20px;
+      background: #ffffff;
+      color: #1d1d1f;
 
-  transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
-}
+      text-align: left;
+      cursor: pointer;
 
-.card:hover {
-  box-shadow: 0 5px 22px rgba(0,0,0,0.08);
-}
+      box-shadow: 0 3px 18px rgba(0, 0, 0, 0.05);
 
-.card:active {
-  transform: scale(0.98);
-}
+      transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+    }
 
-/* AVATAR */
+    .card:hover {
+      box-shadow: 0 5px 22px rgba(0, 0, 0, 0.08);
+    }
 
-.avatar {
-  width: 50px;
-  height: 50px;
-  flex-shrink: 0;
+    .card:active {
+      transform: scale(0.98);
+    }
 
-  border-radius: 50%;
-  background: #f0f0f2;
+    .avatar {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-  font-size: 18px;
-  font-weight: 600;
-}
+      border-radius: 50%;
+      background: #f0f0f2;
 
-/* IKONY KATEGORII */
+      font-size: 18px;
+      font-weight: 600;
+    }
 
-.icon {
-  width: 50px;
-  height: 50px;
-  flex-shrink: 0;
+    .icon,
+    .exercise-icon {
+      flex-shrink: 0;
 
-  border-radius: 15px;
-  background: #f0f0f2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+      background: #f0f0f2;
+      color: #1d1d1f;
+    }
 
-  color: #1d1d1f;
-}
+    .icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+    }
 
-.icon svg {
-  width: 25px;
-  height: 25px;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-}
+    .exercise-icon {
+      width: 66px;
+      height: 66px;
+      border-radius: 18px;
+    }
 
-.arrow {
-  margin-left: auto;
-  color: #86868b;
-  font-size: 26px;
-  font-weight: 400;
-}
+    .icon svg {
+      width: 26px;
+      height: 26px;
+    }
 
-/* NAWIGACJA */
+    .exercise-icon svg {
+      width: 48px;
+      height: 48px;
+    }
 
-.back {
-  border: 0;
-  background: none;
-  color: #0071e3;
+    svg {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
 
-  font-family: inherit;
-  font-size: 16px;
+    .arrow {
+      margin-left: auto;
+      flex-shrink: 0;
 
-  padding: 0;
-  margin-bottom: 32px;
+      color: #86868b;
+      font-size: 26px;
+      font-weight: 400;
+    }
 
-  cursor: pointer;
-}
+    .back {
+      margin: 0 0 32px;
+      padding: 0;
 
-.user {
-  color: #0071e3;
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
+      border: 0;
+      background: none;
+      color: #0071e3;
 
-/* EKRANY */
+      font-size: 16px;
+      cursor: pointer;
+    }
 
-.screen {
-  display: none;
-}
+    .user {
+      margin-bottom: 10px;
+      color: #0071e3;
+      font-size: 15px;
+      font-weight: 600;
+    }
 
-.screen.active {
-  display: block;
-}
+    .person-name,
+    .category-name {
+      font-size: 18px;
+      font-weight: 600;
+    }
 
-</style>
+    .exercise-card {
+      align-items: center;
+    }
+
+    .exercise-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .exercise-name {
+      font-size: 16px;
+      font-weight: 650;
+      line-height: 1.3;
+    }
+
+    .exercise-subtitle {
+      margin-top: 4px;
+      color: #86868b;
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.35;
+    }
+
+    .exercise-last {
+      margin-top: 8px;
+      color: #0071e3;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .add-exercise {
+      width: 100%;
+      margin-top: 8px;
+      padding: 18px;
+
+      border: 1.5px dashed #c7c7cc;
+      border-radius: 20px;
+      background: transparent;
+      color: #0071e3;
+
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .add-exercise:active {
+      background: #eeeeef;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+
+      padding: 20px;
+      align-items: flex-end;
+      justify-content: center;
+
+      background: rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(6px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+
+      padding: 24px;
+      margin-bottom: 8px;
+
+      border-radius: 24px;
+      background: #ffffff;
+    }
+
+    .modal-title {
+      margin-bottom: 22px;
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 7px;
+
+      color: #6e6e73;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      margin-bottom: 18px;
+      padding: 15px;
+
+      border: 0;
+      outline: none;
+      border-radius: 14px;
+
+      background: #f5f5f7;
+      color: #1d1d1f;
+      font-size: 16px;
+    }
+
+    .input:focus,
+    .select:focus {
+      box-shadow: 0 0 0 2px #0071e3;
+    }
+
+    .primary-button {
+      width: 100%;
+      padding: 15px;
+
+      border: 0;
+      border-radius: 14px;
+      background: #0071e3;
+      color: #ffffff;
+
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .cancel-button {
+      width: 100%;
+      padding: 15px 0 4px;
+
+      border: 0;
+      background: none;
+      color: #6e6e73;
+
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 380px) {
+      .app {
+        padding-left: 15px;
+        padding-right: 15px;
+      }
+
+      .exercise-icon {
+        width: 58px;
+        height: 58px;
+      }
+
+      .exercise-icon svg {
+        width: 42px;
+        height: 42px;
+      }
+
+      .exercise-name {
+        font-size: 15px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<main class="app">
+  <main class="app">
 
-<!-- ============================= -->
-<!-- WYBÓR OSOBY -->
-<!-- ============================= -->
+    <!-- EKRAN WYBORU OSOBY -->
 
-<section id="personScreen" class="screen active">
+    <section id="personScreen" class="screen active">
 
-  <div class="logo">FitLog</div>
-  <div class="subtitle">Trening. Progres. Historia.</div>
+      <div class="logo">FitLog</div>
+      <div class="subtitle">Trening. Progres. Historia.</div>
 
-  <h2>Kto dziś trenuje?</h2>
+      <h2>Kto dziś trenuje?</h2>
 
-  <div class="description">
-    Wybierz osobę, aby rozpocząć trening.
+      <div class="description">
+        Wybierz osobę, aby rozpocząć trening.
+      </div>
+
+      <button class="card" onclick="selectPerson('Adam')">
+        <div class="avatar">A</div>
+        <span class="person-name">Adam</span>
+        <div class="arrow">›</div>
+      </button>
+
+      <button class="card" onclick="selectPerson('Szymon')">
+        <div class="avatar">S</div>
+        <span class="person-name">Szymon</span>
+        <div class="arrow">›</div>
+      </button>
+
+    </section>
+
+
+    <!-- EKRAN WYBORU KATEGORII -->
+
+    <section id="categoryScreen" class="screen">
+
+      <button class="back" onclick="showPersonScreen()">
+        ‹ Zmień osobę
+      </button>
+
+      <div class="user" id="activeUser"></div>
+
+      <h2>Wybierz kategorię</h2>
+
+      <div class="description">
+        Co dziś ćwiczymy?
+      </div>
+
+      <button class="card" onclick="selectCategory('Ławka')">
+
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 18h16"/>
+            <path d="M6 18v-5"/>
+            <path d="M18 18v-5"/>
+            <path d="M7 13h10"/>
+            <path d="M3 9h18"/>
+            <path d="M5 7v4"/>
+            <path d="M19 7v4"/>
+          </svg>
+        </div>
+
+        <span class="category-name">Ławka</span>
+        <div class="arrow">›</div>
+
+      </button>
+
+      <button class="card" onclick="selectCategory('Linki')">
+
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="5" cy="6" r="2"/>
+            <circle cx="19" cy="6" r="2"/>
+            <path d="M5 8v5"/>
+            <path d="M19 8v5"/>
+            <path d="M5 13l5 5"/>
+            <path d="M19 13l-5 5"/>
+            <circle cx="12" cy="18" r="2"/>
+          </svg>
+        </div>
+
+        <span class="category-name">Linki</span>
+        <div class="arrow">›</div>
+
+      </button>
+
+      <button class="card" onclick="selectCategory('Maszyny')">
+
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3"/>
+            <path d="M12 19v3"/>
+            <path d="M2 12h3"/>
+            <path d="M19 12h3"/>
+            <path d="M5 5l2 2"/>
+            <path d="M17 17l2 2"/>
+            <path d="M19 5l-2 2"/>
+            <path d="M7 17l-2 2"/>
+          </svg>
+        </div>
+
+        <span class="category-name">Maszyny</span>
+        <div class="arrow">›</div>
+
+      </button>
+
+      <button class="card" onclick="selectCategory('Inne')">
+
+        <div class="icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 5v14"/>
+            <path d="M5 12h14"/>
+          </svg>
+        </div>
+
+        <span class="category-name">Inne</span>
+        <div class="arrow">›</div>
+
+      </button>
+
+    </section>
+
+
+    <!-- EKRAN WYBORU ĆWICZENIA -->
+
+    <section id="exerciseScreen" class="screen">
+
+      <button class="back" onclick="showCategoryScreen()">
+        ‹ Kategorie
+      </button>
+
+      <div class="user" id="exerciseUser"></div>
+
+      <h2 id="exerciseHeading">Ławka</h2>
+
+      <div class="description">
+        Wybierz ćwiczenie.
+      </div>
+
+      <div id="exerciseList"></div>
+
+      <button class="add-exercise" onclick="openAddExercise()">
+        + Dodaj własne ćwiczenie
+      </button>
+
+    </section>
+
+  </main>
+
+
+  <!-- OKNO DODAWANIA ĆWICZENIA -->
+
+  <div id="addExerciseModal" class="modal">
+
+    <div class="modal-box">
+
+      <div class="modal-title">
+        Nowe ćwiczenie
+      </div>
+
+      <label class="label" for="exerciseName">
+        Nazwa ćwiczenia
+      </label>
+
+      <input
+        id="exerciseName"
+        class="input"
+        type="text"
+        placeholder="np. Wyciskanie wąskim chwytem"
+      >
+
+      <label class="label" for="exerciseSubtitle">
+        Podtytuł (opcjonalnie)
+      </label>
+
+      <input
+        id="exerciseSubtitle"
+        class="input"
+        type="text"
+        placeholder="np. ławka lekko uniesiona"
+      >
+
+      <label class="label" for="exerciseIcon">
+        Piktogram
+      </label>
+
+      <select id="exerciseIcon" class="select">
+        <option value="barbell">Sztanga</option>
+        <option value="dumbbells">Hantle leżąc</option>
+        <option value="shoulders">Hantle siedząc</option>
+        <option value="biceps">Biceps / ramiona</option>
+        <option value="cable">Linki</option>
+        <option value="machine">Maszyna</option>
+        <option value="other">Inne</option>
+      </select>
+
+      <button class="primary-button" onclick="addExercise()">
+        Dodaj ćwiczenie
+      </button>
+
+      <button class="cancel-button" onclick="closeAddExercise()">
+        Anuluj
+      </button>
+
+    </div>
+
   </div>
 
-  <button class="card" onclick="selectPerson('Adam')">
 
-    <div class="avatar">A</div>
+  <script>
+    let currentUser = null;
+    let currentCategory = null;
+
+    const exercises = {
+      "Ławka": [
+        {
+          name: "Wyciskanie sztangi, ławka prosta",
+          subtitle: "",
+          icon: "barbell"
+        },
+        {
+          name: "Wyciskanie hantli leżąc",
+          subtitle: "",
+          icon: "dumbbells"
+        },
+        {
+          name: "Wyciskanie hantli siedząc",
+          subtitle: "",
+          icon: "shoulders"
+        },
+        {
+          name: "Bicepsy siedząc hantlami",
+          subtitle: "",
+          icon: "biceps"
+        }
+      ],
+
+      "Linki": [],
+      "Maszyny": [],
+      "Inne": []
+    };
+
+
+    function getIcon(type) {
+
+      const icons = {
+
+        barbell: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+
+            <!-- ławka -->
+            <path d="M18 45h29"/>
+            <path d="M22 45v8"/>
+            <path d="M43 45v8"/>
+
+            <!-- sylwetka leżąca -->
+            <circle cx="19" cy="36" r="3"/>
+            <path d="M22 37h20"/>
+            <path d="M38 37l7 6"/>
+
+            <!-- ręce do sztangi -->
+            <path d="M28 36l-2-12"/>
+            <path d="M37 36l2-12"/>
+
+            <!-- sztanga -->
+            <path d="M14 23h36"/>
+            <path d="M18 18v10"/>
+            <path d="M46 18v10"/>
+            <path d="M12 20v6"/>
+            <path d="M52 20v6"/>
+
+          </svg>
+        `,
+
+        dumbbells: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+
+            <!-- ławka -->
+            <path d="M18 46h29"/>
+            <path d="M22 46v8"/>
+            <path d="M43 46v8"/>
+
+            <!-- sylwetka leżąca -->
+            <circle cx="18" cy="37" r="3"/>
+            <path d="M21 38h22"/>
+            <path d="M38 38l7 6"/>
+
+            <!-- ręce -->
+            <path d="M28 37l-5-14"/>
+            <path d="M36 37l5-14"/>
+
+            <!-- lewy hantel -->
+            <path d="M17 22h12"/>
+            <path d="M19 18v8"/>
+            <path d="M27 18v8"/>
+
+            <!-- prawy hantel -->
+            <path d="M35 22h12"/>
+            <path d="M37 18v8"/>
+            <path d="M45 18v8"/>
+
+          </svg>
+        `,
+
+        shoulders: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+
+            <!-- ławka z oparciem -->
+            <path d="M25 33v18"/>
+            <path d="M25 48h22"/>
+            <path d="M30 48v7"/>
+            <path d="M44 48v7"/>
 
-    <span>Adam</span>
+            <!-- osoba -->
+            <circle cx="35" cy="21" r="4"/>
+            <path d="M35 25v18"/>
+            <path d="M35 43l-7 7"/>
+            <path d="M35 43l9 6"/>
 
-    <div class="arrow">›</div>
+            <!-- ramiona -->
+            <path d="M34 30l-9-7"/>
+            <path d="M36 30l9-7"/>
 
-  </button>
+            <!-- hantle -->
+            <path d="M19 22h12"/>
+            <path d="M21 18v8"/>
+            <path d="M29 18v8"/>
 
+            <path d="M39 22h12"/>
+            <path d="M41 18v8"/>
+            <path d="M49 18v8"/>
 
-  <button class="card" onclick="selectPerson('Szymon')">
+          </svg>
+        `,
 
-    <div class="avatar">S</div>
+        biceps: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
 
-    <span>Szymon</span>
+            <!-- ławka -->
+            <path d="M24 48h24"/>
+            <path d="M28 48v7"/>
+            <path d="M44 48v7"/>
+            <path d="M25 32v16"/>
 
-    <div class="arrow">›</div>
+            <!-- osoba -->
+            <circle cx="35" cy="19" r="4"/>
+            <path d="M35 23v20"/>
+            <path d="M35 43l-8 7"/>
+            <path d="M35 43l10 6"/>
 
-  </button>
+            <!-- zgięte ręce -->
+            <path d="M34 29l-8 6l5 7"/>
+            <path d="M36 29l8 6l-5 7"/>
 
-</section>
+            <!-- hantle przy dłoniach -->
+            <path d="M24 42h10"/>
+            <path d="M26 38v8"/>
+            <path d="M32 38v8"/>
 
+            <path d="M36 42h10"/>
+            <path d="M38 38v8"/>
+            <path d="M44 38v8"/>
 
-<!-- ============================= -->
-<!-- WYBÓR KATEGORII -->
-<!-- ============================= -->
+          </svg>
+        `,
 
-<section id="categoryScreen" class="screen">
+        cable: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
 
-  <button class="back" onclick="goBack()">
-    ‹ Zmień osobę
-  </button>
+            <path d="M13 10v44"/>
+            <path d="M51 10v44"/>
+            <path d="M13 10h38"/>
 
-  <div class="user" id="activeUser"></div>
+            <circle cx="19" cy="16" r="3"/>
+            <circle cx="45" cy="16" r="3"/>
 
-  <h2>Wybierz kategorię</h2>
+            <path d="M19 19l10 18"/>
+            <path d="M45 19L35 37"/>
 
-  <div class="description">
-    Co dziś ćwiczymy?
-  </div>
+            <path d="M27 37h10"/>
 
+            <circle cx="32" cy="28" r="4"/>
+            <path d="M32 32v14"/>
+            <path d="M32 46l-7 8"/>
+            <path d="M32 46l7 8"/>
 
-  <!-- ŁAWKA -->
+          </svg>
+        `,
 
-  <button class="card" onclick="selectCategory('Ławka')">
+        machine: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
 
-    <div class="icon">
+            <path d="M15 9v46"/>
+            <path d="M49 9v46"/>
+            <path d="M15 9h34"/>
 
-      <svg viewBox="0 0 24 24">
+            <path d="M20 15h8v22h-8z"/>
+            <path d="M36 15h8v22h-8z"/>
 
-        <path d="M4 18h16"/>
-        <path d="M6 18v-5"/>
-        <path d="M18 18v-5"/>
-        <path d="M7 13h10"/>
-        <path d="M3 9h18"/>
-        <path d="M5 7v4"/>
-        <path d="M19 7v4"/>
+            <path d="M24 42h16"/>
+            <path d="M28 42v10"/>
+            <path d="M36 42v10"/>
 
-      </svg>
+            <circle cx="32" cy="28" r="4"/>
+            <path d="M32 32v12"/>
 
-    </div>
+          </svg>
+        `,
 
-    <span>Ławka</span>
+        other: `
+          <svg viewBox="0 0 64 64" aria-hidden="true">
 
-    <div class="arrow">›</div>
+            <circle cx="32" cy="32" r="20"/>
+            <path d="M32 21v22"/>
+            <path d="M21 32h22"/>
 
-  </button>
+          </svg>
+        `
 
+      };
 
-  <!-- LINKI -->
+      return icons[type] || icons.other;
+    }
 
-  <button class="card" onclick="selectCategory('Linki')">
 
-    <div class="icon">
+    function hideAllScreens() {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+    }
 
-      <svg viewBox="0 0 24 24">
 
-        <circle cx="5" cy="6" r="2"/>
-        <circle cx="19" cy="6" r="2"/>
+    function selectPerson(name) {
+      currentUser = name;
 
-        <path d="M5 8v5"/>
-        <path d="M19 8v5"/>
+      hideAllScreens();
 
-        <path d="M5 13l5 5"/>
-        <path d="M19 13l-5 5"/>
+      document
+        .getElementById("categoryScreen")
+        .classList.add("active");
 
-        <circle cx="12" cy="18" r="2"/>
+      document
+        .getElementById("activeUser")
+        .textContent = name + " · Dzisiejszy trening";
+    }
 
-      </svg>
 
-    </div>
+    function showPersonScreen() {
+      hideAllScreens();
 
-    <span>Linki</span>
+      document
+        .getElementById("personScreen")
+        .classList.add("active");
+    }
 
-    <div class="arrow">›</div>
 
-  </button>
+    function showCategoryScreen() {
+      hideAllScreens();
 
+      document
+        .getElementById("categoryScreen")
+        .classList.add("active");
+    }
 
-  <!-- MASZYNY -->
 
-  <button class="card" onclick="selectCategory('Maszyny')">
+    function selectCategory(category) {
+      currentCategory = category;
 
-    <div class="icon">
+      hideAllScreens();
 
-      <svg viewBox="0 0 24 24">
+      document
+        .getElementById("exerciseScreen")
+        .classList.add("active");
 
-        <circle cx="12" cy="12" r="3"/>
+      document
+        .getElementById("exerciseUser")
+        .textContent = currentUser + " · Dzisiejszy trening";
 
-        <path d="M12 2v3"/>
-        <path d="M12 19v3"/>
+      document
+        .getElementById("exerciseHeading")
+        .textContent = category;
 
-        <path d="M2 12h3"/>
-        <path d="M19 12h3"/>
+      renderExercises();
+    }
 
-        <path d="M5 5l2 2"/>
-        <path d="M17 17l2 2"/>
 
-        <path d="M19 5l-2 2"/>
-        <path d="M7 17l-2 2"/>
+    function renderExercises() {
+      const list = document.getElementById("exerciseList");
 
-      </svg>
+      list.innerHTML = "";
 
-    </div>
+      const categoryExercises = exercises[currentCategory] || [];
 
-    <span>Maszyny</span>
+      if (categoryExercises.length === 0) {
+        list.innerHTML = `
+          <div class="description">
+            Nie ma jeszcze ćwiczeń w tej kategorii.
+          </div>
+        `;
 
-    <div class="arrow">›</div>
+        return;
+      }
 
-  </button>
+      categoryExercises.forEach((exercise, index) => {
+        const button = document.createElement("button");
 
+        button.className = "card exercise-card";
 
-  <!-- INNE -->
+        button.onclick = function () {
+          selectExercise(index);
+        };
 
-  <button class="card" onclick="selectCategory('Inne')">
+        const subtitleHTML = exercise.subtitle
+          ? `
+            <div class="exercise-subtitle">
+              ${escapeHtml(exercise.subtitle)}
+            </div>
+          `
+          : "";
 
-    <div class="icon">
+        button.innerHTML = `
+          <div class="exercise-icon">
+            ${getIcon(exercise.icon)}
+          </div>
 
-      <svg viewBox="0 0 24 24">
+          <div class="exercise-content">
 
-        <path d="M12 5v14"/>
-        <path d="M5 12h14"/>
+            <div class="exercise-name">
+              ${escapeHtml(exercise.name)}
+            </div>
 
-      </svg>
+            ${subtitleHTML}
 
-    </div>
+            <div class="exercise-last">
+              Brak poprzedniego treningu
+            </div>
 
-    <span>Inne</span>
+          </div>
 
-    <div class="arrow">›</div>
+          <div class="arrow">›</div>
+        `;
 
-  </button>
+        list.appendChild(button);
+      });
+    }
 
-</section>
 
-</main>
+    function selectExercise(index) {
+      const exercise = exercises[currentCategory][index];
 
+      alert("Wybrano ćwiczenie: " + exercise.name);
+    }
 
-<script>
 
-let currentUser = null;
+    function openAddExercise() {
+      document
+        .getElementById("addExerciseModal")
+        .classList.add("active");
+    }
 
 
-/* WYBÓR OSOBY */
+    function closeAddExercise() {
+      document
+        .getElementById("addExerciseModal")
+        .classList.remove("active");
 
-function selectPerson(name) {
+      document.getElementById("exerciseName").value = "";
+      document.getElementById("exerciseSubtitle").value = "";
+      document.getElementById("exerciseIcon").value = "barbell";
+    }
 
-  currentUser = name;
 
-  document
-    .getElementById("personScreen")
-    .classList.remove("active");
+    function addExercise() {
+      const name = document
+        .getElementById("exerciseName")
+        .value
+        .trim();
 
-  document
-    .getElementById("categoryScreen")
-    .classList.add("active");
+      const subtitle = document
+        .getElementById("exerciseSubtitle")
+        .value
+        .trim();
 
-  document
-    .getElementById("activeUser")
-    .textContent = name + " · Dzisiejszy trening";
+      const icon = document
+        .getElementById("exerciseIcon")
+        .value;
 
-}
+      if (!name) {
+        alert("Wpisz nazwę ćwiczenia.");
+        return;
+      }
 
+      exercises[currentCategory].push({
+        name: name,
+        subtitle: subtitle,
+        icon: icon
+      });
 
-/* POWRÓT */
+      closeAddExercise();
+      renderExercises();
+    }
 
-function goBack() {
 
-  document
-    .getElementById("categoryScreen")
-    .classList.remove("active");
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
 
-  document
-    .getElementById("personScreen")
-    .classList.add("active");
-
-}
-
-
-/* WYBÓR KATEGORII */
-
-function selectCategory(category) {
-
-  alert("Wybrano kategorię: " + category);
-
-}
-
-</script>
+  </script>
 
 </body>
 </html>
