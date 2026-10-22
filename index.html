@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FitLog</title>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; }
 
@@ -1019,7 +1019,71 @@ svg {
   </button>
 
 </section>
+<!-- LOGOWANIE -->
 
+<section id="loginScreen" class="screen">
+
+  <button class="back" onclick="backToPersonSelection()">
+    ‹ Wróć
+  </button>
+
+  <div class="logo">FitLog</div>
+  <div class="subtitle" id="loginSubtitle">
+    Zaloguj się
+  </div>
+
+  <h2 id="loginTitle">Logowanie</h2>
+
+  <div class="description">
+    Wpisz swój adres e-mail i hasło.
+  </div>
+
+  <div class="section-card">
+
+    <label class="field-label" for="loginEmail">
+      E-mail
+    </label>
+
+    <input
+      id="loginEmail"
+      class="input"
+      type="email"
+      autocomplete="email"
+      placeholder="adres@email.pl"
+    >
+
+    <label class="field-label" for="loginPassword">
+      Hasło
+    </label>
+
+    <input
+      id="loginPassword"
+      class="input"
+      type="password"
+      autocomplete="current-password"
+      placeholder="••••••••"
+    >
+
+    <div
+      id="loginError"
+      style="
+        display:none;
+        margin-bottom:15px;
+        color:#d70015;
+        font-size:14px;
+      "
+    ></div>
+
+    <button
+      class="primary-button"
+      onclick="loginUser()"
+    >
+      Zaloguj się
+    </button>
+
+  </div>
+
+</section>
 </main>
 
 
@@ -1103,6 +1167,14 @@ svg {
 
 <script>
 
+  const SUPABASE_URL = "https://xbbnwxdjkxxluhtjphyg.supabase.co";
+const SUPABASE_KEY = "sb_publishable_KqJvga_Ldza86FTS5CEdQQ_zR5i-Z6S";
+
+const supabaseClient = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+  
 let currentUser = null;
 let currentCategory = null;
 let currentExerciseIndex = null;
@@ -1268,6 +1340,130 @@ function selectPerson(name) {
   currentUser = name;
 
   completedExercises = [];
+
+  document.getElementById("loginTitle").textContent =
+    "Logowanie · " + name;
+
+  document.getElementById("loginEmail").value = "";
+  document.getElementById("loginPassword").value = "";
+
+  const errorBox = document.getElementById("loginError");
+
+  errorBox.style.display = "none";
+  errorBox.textContent = "";
+
+  showScreen("loginScreen");
+}
+
+
+function backToPersonSelection() {
+
+  currentUser = null;
+
+  document.getElementById("loginPassword").value = "";
+
+  showScreen("personScreen");
+}
+
+
+async function loginUser() {
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+  const errorBox =
+    document.getElementById("loginError");
+
+  errorBox.style.display = "none";
+  errorBox.textContent = "";
+
+  if (!email || !password) {
+
+    errorBox.textContent =
+      "Wpisz adres e-mail i hasło.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+  }
+
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+
+  if (error) {
+
+    errorBox.textContent =
+      "Nie udało się zalogować. Sprawdź e-mail i hasło.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+  }
+
+
+  if (!data.user) {
+
+    errorBox.textContent =
+      "Nie udało się rozpoznać użytkownika.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+  }
+
+
+  const { data: profile, error: profileError } =
+    await supabaseClient
+      .from("profiles")
+      .select("id, name")
+      .eq("id", data.user.id)
+      .single();
+
+
+  if (profileError || !profile) {
+
+    await supabaseClient.auth.signOut();
+
+    errorBox.textContent =
+      "Nie znaleziono profilu użytkownika.";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+  }
+
+
+  if (profile.name !== currentUser) {
+
+    await supabaseClient.auth.signOut();
+
+    errorBox.textContent =
+      "To konto nie należy do użytkownika " +
+      currentUser +
+      ".";
+
+    errorBox.style.display =
+      "block";
+
+    return;
+  }
+
+
+  currentUser = profile.name;
+
+  document.getElementById("loginPassword").value = "";
 
   updateCategoryScreen();
 
@@ -2557,7 +2753,7 @@ function finishExercise() {
 
 /* KONIEC CAŁEGO TRENINGU */
 
-function finishWorkout() {
+async function finishWorkout() {
 
   if(
     !completedExercises.length
@@ -2571,7 +2767,7 @@ function finishWorkout() {
 
     if(!leave) return;
 
-
+await supabaseClient.auth.signOut();
     currentUser = null;
 
     showScreen(
