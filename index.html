@@ -1281,7 +1281,10 @@ async function selectPerson(name) {
       .single();
 
   if (error || !profile) {
-    alert("Nie udało się znaleźć profilu " + name + " w bazie.");
+    alert(
+  "Błąd Supabase: " +
+  (error ? error.message : "Nie znaleziono profilu")
+);
     console.error(error);
     return;
   }
