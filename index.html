@@ -1119,7 +1119,8 @@ let editingSetIndex = null;
 
 let completedExercises = [];
 
-
+let currentWorkoutId = null;
+let currentProfileId = null;
 const exercises = {
 
   "Ławka": [
@@ -1270,10 +1271,25 @@ function showScreen(id) {
 }
 
 
-function selectPerson(name) {
+async function selectPerson(name) {
 
-  currentUser = name;
+  const { data: profile, error } =
+    await supabaseClient
+      .from("profiles")
+      .select("id, name")
+      .eq("name", name)
+      .single();
 
+  if (error || !profile) {
+    alert("Nie udało się znaleźć profilu " + name + " w bazie.");
+    console.error(error);
+    return;
+  }
+
+  currentUser = profile.name;
+  currentProfileId = profile.id;
+
+  currentWorkoutId = null;
   completedExercises = [];
 
   updateCategoryScreen();
@@ -1286,12 +1302,18 @@ function selectPerson(name) {
 function changePerson() {
 
   currentUser = null;
+  currentProfileId = null;
+  currentWorkoutId = null;
+
   currentCategory = null;
+  currentExerciseIndex = null;
+
   completedExercises = [];
+  todaySets = [];
+  editingSetIndex = null;
 
   showScreen("personScreen");
 }
-
 
 function updateCategoryScreen() {
 
@@ -2474,194 +2496,240 @@ function compareSet(current,previous) {
 
 /* ZAKOŃCZENIE ĆWICZENIA */
 
-function finishExercise() {
+async function finishExercise() {
 
-  if(!todaySets.length) return;
+  if (!todaySets.length) {
+    return;
+  }
 
+  if (!currentProfileId) {
+    alert("Nie udało się rozpoznać użytkownika.");
+    return;
+  }
 
   const exercise =
-    exercises[currentCategory]
-      [currentExerciseIndex];
+    exercises[currentCategory][currentExerciseIndex];
 
 
-  const key =
-    "fitlog-history-" +
-    getExerciseKey(exercise);
+  try {
+
+    /* 1. JEŚLI TO PIERWSZE ĆWICZENIE
+       TWORZYMY TRENING */
+
+    if (!currentWorkoutId) {
+
+      const { data: workout, error: workoutError } =
+        await supabaseClient
+          .from("workouts")
+          .insert({
+            user_id: currentProfileId
+          })
+          .select("id")
+          .single();
 
 
-  const history =
-    readHistory(exercise);
+      if (workoutError) {
+        throw workoutError;
+      }
 
 
-  history.unshift({
+      currentWorkoutId =
+        workout.id;
+    }
 
-    date:
-      new Date()
-        .toISOString(),
 
-    sets:
-      todaySets.map(
-        x => ({
-          weight:x.weight,
-          reps:x.reps
+    /* 2. ZNAJDUJEMY ĆWICZENIE W BAZIE */
+
+    const { data: databaseExercise, error: exerciseError } =
+      await supabaseClient
+        .from("exercises")
+        .select("id")
+        .eq("name", exercise.name)
+        .eq("category", currentCategory)
+        .limit(1)
+        .single();
+
+
+    if (exerciseError) {
+      throw exerciseError;
+    }
+
+
+    /* 3. DODAJEMY ĆWICZENIE DO TRENINGU */
+
+    const { data: workoutExercise, error: workoutExerciseError } =
+      await supabaseClient
+        .from("workout_exercises")
+        .insert({
+          workout_id: currentWorkoutId,
+          exercise_id: databaseExercise.id,
+          position: completedExercises.length + 1
         })
-      )
-
-  });
-
-
-  localStorage.setItem(
-    key,
-    JSON.stringify(history)
-  );
+        .select("id")
+        .single();
 
 
-  const existing =
-    completedExercises.find(
-      x =>
-        x.category ===
-        currentCategory &&
-        x.exerciseName ===
-        exercise.name
+    if (workoutExerciseError) {
+      throw workoutExerciseError;
+    }
+
+
+    /* 4. ZAPISUJEMY WSZYSTKIE SERIE */
+
+    const setsToSave =
+      todaySets.map((set, index) => ({
+        workout_exercise_id: workoutExercise.id,
+        set_number: index + 1,
+        weight: set.weight,
+        reps: set.reps
+      }));
+
+
+    const { error: setsError } =
+      await supabaseClient
+        .from("exercise_sets")
+        .insert(setsToSave);
+
+
+    if (setsError) {
+      throw setsError;
+    }
+
+
+    /* 5. ZAPAMIĘTUJEMY ĆWICZENIE
+       W BIEŻĄCYM TRENINGU */
+
+    const existing =
+      completedExercises.find(
+        item =>
+          item.category === currentCategory &&
+          item.exerciseName === exercise.name
+      );
+
+
+    if (existing) {
+
+      existing.sets =
+        todaySets.length;
+
+    } else {
+
+      completedExercises.push({
+        category: currentCategory,
+        exerciseName: exercise.name,
+        sets: todaySets.length
+      });
+
+    }
+
+
+    /* 6. CZYŚCIMY SERIE I WRACAMY
+       DO KATEGORII */
+
+    todaySets = [];
+
+    editingSetIndex = null;
+
+    updateCategoryScreen();
+
+    showScreen("categoryScreen");
+
+
+  } catch (error) {
+
+    console.error(
+      "Błąd zapisu ćwiczenia:",
+      error
     );
 
-
-  if(existing) {
-
-    existing.sets =
-      todaySets.length;
-
-  } else {
-
-    completedExercises.push({
-
-      category:
-        currentCategory,
-
-      exerciseName:
-        exercise.name,
-
-      sets:
-        todaySets.length
-
-    });
+    alert(
+      "Nie udało się zapisać ćwiczenia w bazie. Spróbuj ponownie."
+    );
 
   }
 
-
-  todaySets = [];
-
-  editingSetIndex = null;
-
-
-  updateCategoryScreen();
-
-  showScreen(
-    "categoryScreen"
-  );
-
 }
-
 
 /* KONIEC CAŁEGO TRENINGU */
 
 async function finishWorkout() {
 
-  if(
-    !completedExercises.length
-  ) {
+  if (!completedExercises.length) {
 
-    const leave =
-      confirm(
-        "Nie zapisano żadnego ćwiczenia. Zakończyć trening?"
-      );
-
-
-    if(!leave) return;
-
-
-    currentUser = null;
-
-    showScreen(
-      "personScreen"
+    const leave = confirm(
+      "Nie zapisano żadnego ćwiczenia. Zakończyć trening?"
     );
 
-    return;
+    if (!leave) {
+      return;
+    }
 
+    currentUser = null;
+    currentProfileId = null;
+    currentWorkoutId = null;
+
+    showScreen("personScreen");
+
+    return;
   }
 
 
-  const confirmed =
-    confirm(
-      "Zakończyć dzisiejszy trening?"
+  const confirmed = confirm(
+    "Zakończyć dzisiejszy trening?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    if (currentWorkoutId) {
+
+      const { error } =
+        await supabaseClient
+          .from("workouts")
+          .update({
+            finished_at: new Date().toISOString()
+          })
+          .eq("id", currentWorkoutId);
+
+      if (error) {
+        throw error;
+      }
+
+    }
+
+
+    completedExercises = [];
+    todaySets = [];
+
+    currentCategory = null;
+    currentExerciseIndex = null;
+
+    currentWorkoutId = null;
+    currentProfileId = null;
+    currentUser = null;
+
+    showScreen("personScreen");
+
+
+  } catch (error) {
+
+    console.error(
+      "Błąd zakończenia treningu:",
+      error
     );
 
+    alert(
+      "Nie udało się zakończyć treningu. Spróbuj ponownie."
+    );
 
-  if(!confirmed) return;
-
-
-  const sessions =
-    readWorkoutSessions();
-
-
-  sessions.unshift({
-
-    date:
-      new Date()
-        .toISOString(),
-
-    exercises:
-      completedExercises.map(
-        item => ({
-          category:
-            item.category,
-
-          exerciseName:
-            item.exerciseName,
-
-          sets:
-            item.sets
-        })
-      )
-
-  });
-
-
-  /*
-    Lokalnie nie potrzebujemy przechowywać
-    nieskończonej liczby podsumowań.
-    Zachowujemy ostatnich 100.
-  */
-
-  localStorage.setItem(
-
-    getWorkoutSessionKey(),
-
-    JSON.stringify(
-      sessions.slice(0,100)
-    )
-
-  );
-
-
-  completedExercises = [];
-
-  todaySets = [];
-
-  currentCategory = null;
-
-  currentExerciseIndex = null;
-
-  currentUser = null;
-
-
-  showScreen(
-    "personScreen"
-  );
+  }
 
 }
-
-
+  
 /* DODAWANIE ĆWICZEŃ */
 
 function openAddExercise() {
